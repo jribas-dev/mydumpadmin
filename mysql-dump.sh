@@ -58,8 +58,20 @@ db_backup(){
                 [ $S3_ENABLE -eq 1 ] && s3_backup
         done
         [ $VERBOSE -eq 1 ] && echo "*** Backup completed ***"
+        [ $ZIPFILE -eq 1 ] && zip_pack
         [ $MEGA_ENABLE -eq 1 ] && mega_backup
         [ $VERBOSE -eq 1 ] && echo "*** Check backup files in ${FILE_PATH} ***"
+}
+
+### close_on_error on demand with message ###
+zip_pack(){
+	CRYPPARAM=""
+        if [ $ZIPCRYP -eq 1 ]; then
+                CRYPPARAM="-e -P ${ZIPPASS}"
+	fi
+        cd ${FILE_PATH}
+        zip -9 ${CRYPPARAM} ${CURRENT_DATE}-${CURRENT_TIME}.zip *.gz
+        rm *.gz
 }
 
 ### close_on_error on demand with message ###
@@ -85,6 +97,9 @@ check_cmds(){
 	fi
 	if [ $MEGA_ENABLE -eq 1 ]; then
 	       [ ! -x $MEGA ] && close_on_error "FILENAME $MEGA does not exists. Make sure correct path is set in $CONFIGFILE."
+	fi
+	if [ $ZIPFILE -eq 1 ]; then
+	       [ ! -x $ZIP ] && close_on_error "FILENAME $ZIP does not exists. Make sure correct path is set in $CONFIGFILE."
 	fi
 }
 
