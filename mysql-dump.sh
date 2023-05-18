@@ -143,15 +143,16 @@ mega_remove(){
 
 ### Remove older backups
 clean_old_backups(){
-	[ $VERBOSE -eq 1 ] && echo "Removing old backups"
-	DBDELDATE=`date +"${DATE_FORMAT}" --date="${BACKUP_RETAIN_DAYS} days ago"`
-	if [ ! -z ${LOCAL_BACKUP_DIR} ]; then
-		cd ${LOCAL_BACKUP_DIR}
-		if [ ! -z ${DBDELDATE} ] && [ -d ${DBDELDATE} ]; then
-			rm -rf ${DBDELDATE}
+        [ $VERBOSE -eq 1 ] && echo "Removing old backups"
+        if [ ! -z ${LOCAL_BACKUP_DIR} ]; then
+                cd ${LOCAL_BACKUP_DIR}
+                while [ `ls -1 | wc -l` -gt ${BACKUP_RETAIN_DAYS} ]; do
+                        DBDELDATE=`ls -c1 -r | head -1`
+                        echo "${DBDELDATE} removed"
+                        rm -rf $DBDELDATE
                         [ $MEGA_ENABLE -eq 1 ] && mega_remove
-		fi
-	fi
+                done
+        fi
 }
 
 ### Send report email
